@@ -193,18 +193,16 @@
 		  		(recur (.readLine x) (str f-s s "\r\n"))))
 		  t (check-for-content-length y)
 		  k (prn "The length of the content is " t)
+
 		  y-new (if t 
-		  	        (loop [a y c 0]
-		  	          (if  (= t c)
-		  	         	   (str a "\r\n")
-		  	         	   (let [next-line (.readLine x)] 
-		  	         		   (recur (str a next-line "\r\n") (+ c (count next-line))))))
+		  	        (let [body (char-array t)]
+		  	        	(.read x body 0 t)
+		  	        	(apply str y body))
 		  	        y)
 		  ]
 		 y-new	  	        
-		 )
+		 ))
 
-	)
 
 (defn send [socket msg]
   (let [writer (io/writer socket)]
