@@ -1,6 +1,8 @@
 # magicserver-clojure
 
-FIXME: description
+A basic HTTP Server in CLojure.
+
+Can handle GET and POST requests currently.
 
 ## Installation
 
@@ -8,9 +10,9 @@ Download from http://example.com/FIXME.
 
 ## Usage
 
-FIXME: explanation
+To start the server
 
-    $ lein run "a"
+    $ lein run 
 
 ## Options
 
