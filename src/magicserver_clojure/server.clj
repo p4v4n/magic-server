@@ -2,6 +2,7 @@
 
 
 (ns magicserver-clojure.server)
+(use 'magicserver-clojure.sessions)
 (use '[clojure.string])
 (use '[clojure.data.json :as json])
 (require '[clojure.java.io :as io])
@@ -124,7 +125,7 @@
 		  			   new-data (assoc data "body" form-body)]
 		  			 (recur (rest c-l) (assoc form (data "name") new-data)))))))
 
-
+;(swap! atom #(assoc % k v))
 (defn parse-fields [body]
 	(let [body-list (split body #"&")]
 		(loop [body-dic {} bl body-list]
@@ -197,7 +198,7 @@
 		  y-new (if t 
 		  	        (let [body (char-array t)]
 		  	        	(.read x body 0 t)
-		  	        	(apply str y body))
+		  	        	(str y (apply str body)))
 		  	        y)
 		  ]
 		 y-new	  	        
