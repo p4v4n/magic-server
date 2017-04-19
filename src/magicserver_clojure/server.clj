@@ -186,22 +186,25 @@
 
 (defn receive [socket]
 	(let [x (io/reader socket)
-		  y (loop [s (.readLine x) f-s ""]
+		  y (loop [s (.readLine x) 
+		  		   f-s ""]
 		  	(if (empty? s)
 		  		(str f-s "\r\n")
 		  		(recur (.readLine x) (str f-s s "\r\n"))))
 		  t (check-for-content-length y)
-		  k (prn t)
+		  k (prn "The length of the content is " t)
 		  y-new (if t 
 		  	        (loop [a y c 0]
-		  	         (if (= t c)
-		  	         	 (str a "\r\n")
-		  	         	(let [next-line (.readLine x)] 
-		  	         		 (recur (str a next-line "\r\n") (+ c (count next-line))))))
-		  	        y)]
+		  	          (if  (= t c)
+		  	         	   (str a "\r\n")
+		  	         	   (let [next-line (.readLine x)] 
+		  	         		   (recur (str a next-line "\r\n") (+ c (count next-line))))))
+		  	        y)
+		  ]
 		 y-new	  	        
-		 ))
+		 )
 
+	)
 
 (defn send [socket msg]
   (let [writer (io/writer socket)]
