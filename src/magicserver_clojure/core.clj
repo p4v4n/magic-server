@@ -5,7 +5,7 @@
 
 (use 'magicserver-clojure.server)
 
+
 (defn -main
-    []
-  (serve-persistent 8888 #(worker %))
-)
+    [port]
+  (serve-persistent (Integer/parseInt port) #(worker %)))
