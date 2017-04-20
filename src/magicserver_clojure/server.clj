@@ -8,7 +8,6 @@
 (import '[java.net ServerSocket])
 
 
-
 (def CONTENT-TYPE {"html" "text/html", "css" "text/css", "js" "application/javascript",
                   "jpeg" "image/jpeg", "jpg" "image/jpg", "png" "image/png", "gif" "image/gif",
                    "ico" "image/x-icon", "text" "text/plain", "json" "application/json"})
@@ -22,7 +21,6 @@
 
 
 (def test-get-str "GET / HTTP/1.1\r\nHost: localhost:8888\r\nConnection: keep-alive\r\nCache-Control: max-age=0\r\nUpgrade-Insecure-Requests: 1\r\nUser-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/56.0.2924.76 Chrome/56.0.2924.76 Safari/537.36\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\r\nDNT: 1\r\nAccept-Encoding: gzip, deflate, sdch, br\r\nAccept-Language: en-GB,en-US;q=0.8,en;q=0.6\r\n\r\n")
-
 (def test-post-str "POST /submit HTTP/1.1\r\nHost: localhost:8888\r\nConnection: keep-alive\r\nContent-Length: 31\r\nCache-Control: max-age=0\r\nOrigin: http://localhost:8888\r\nUpgrade-Insecure-Requests: 1\r\nUser-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/56.0.2924.76 Chrome/56.0.2924.76 Safari/537.36\r\nContent-Type: application/x-www-form-urlencoded\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\r\nDNT: 1\r\nReferer: http://localhost:8888/\r\nAccept-Encoding: gzip, deflate, br\r\nAccept-Language: en-GB,en-US;q=0.8,en;q=0.6\r\n\r\n")
 (def  test-post-str2 "POST /submit HTTP/1.1\r\nHost: localhost:8888\r\nConnection: keep-alive\r\nContent-Length: 31\r\nCache-Control: max-age=0\r\nOrigin: http://localhost:8888\r\nUpgrade-Insecure-Requests: 1\r\nUser-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/57.0.2987.98 Chrome/57.0.2987.98 Safari/537.36\r\nContent-Type: application/x-www-form-urlencoded\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\r\nDNT: 1\r\nReferer: http://localhost:8888/\r\nAccept-Encoding: gzip, deflate, br\r\nAccept-Language: en-GB,en-US;q=0.8,en;q=0.6\r\n\r\nfirstname=Pavan&lastname=Mantha\r\n\r\n")
 
@@ -126,10 +124,10 @@
 
 (defn parse-fields [body]
 	(let [body-list (split body #"&")]
-		(loop [body-dic {} bl body-list]
-			(if (empty? bl)
+		(loop [body-dic {} b-list body-list]
+			(if (empty? b-list)
 				body-dic
-				(let [[k v] (split (first bl) #"=" 2)](recur (assoc body-dic k v) (rest bl)))))))
+				(let [[k v] (split (first b-list) #"=" 2)](recur (assoc body-dic k v) (rest b-list)))))))
 
 
 (def ROUTES {"get" {"/" home} "post" {"/submit" submit} "put" {} "delete" {}})
@@ -176,30 +174,28 @@
 
 
 (defn check-for-content-length [input]
-	(let [x (header-parser (trim input))
-		  y (x "Content-Length")]
-	(if y
-     (Integer/parseInt y))))
-
+	(let [header-dict (header-parser (trim input))
+		  content-length (header-dict "Content-Length")]
+	(if content-length
+        (Integer/parseInt content-length))))
 
 
 (defn receive [socket]
 	(let [x (io/reader socket)
-		  y (loop [s (.readLine x) 
-		  		   f-s ""]
-		  	(if (empty? s)
-		  		(str f-s "\r\n")
-		  		(recur (.readLine x) (str f-s s "\r\n"))))
-		  t (check-for-content-length y)
-		  k (prn "The length of the content is " t)
-
-		  y-new (if t 
-		  	        (let [body (char-array t)]
-		  	        	(.read x body 0 t)
-		  	        	(str y (apply str body)))
-		  	        y)
+		  request-header (loop [s (.readLine x) 
+		  		                f-s ""]
+		  	                    (if (empty? s)
+		  		                    (str f-s "\r\n")
+		  		                    (recur (.readLine x) (str f-s s "\r\n"))))
+		  content-length (check-for-content-length request-header)
+		  k (prn "The length of the content is " content-length)
+		  complete-request (if content-length 
+		  	        (let [body (char-array content-length)]
+		  	        	(.read x body 0 content-length)
+		  	        	(str request-header (apply str body)))
+		  	        request-header)
 		  ]
-		 y-new	  	        
+		 complete-request	  	        
 		 ))
 
 
