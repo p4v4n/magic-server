@@ -9,10 +9,10 @@
     (send-html-handler request response (slurp "./views/index.html")))
 
 
-(defn submit [request response]
-    (let [first-name ((request "content") "firstname")
-          last-name ((request "content") "lastname")]
-        (send-html-handler request response (format (slurp "./views/submit.html") first-name last-name))))
+(defn login [request response]
+    (let [username ((request "content") "username")
+          password ((request "content") "password")]
+        (send-html-handler request response (format (slurp "./views/dashboard.html") username))))
 
 (add-route "get" "/" home)
-(add-route "post" "/submit" submit)
+(add-route "post" "/login" login)
