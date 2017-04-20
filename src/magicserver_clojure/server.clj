@@ -2,7 +2,6 @@
 
 
 (ns magicserver-clojure.server)
-(use 'magicserver-clojure.sessions)
 (use '[clojure.string])
 (use '[clojure.data.json :as json])
 (require '[clojure.java.io :as io])
@@ -103,8 +102,7 @@
 (defn submit [request response]
 	(let [first-name ((request "content") "firstname")
 		  last-name ((request "content") "lastname")]
-		  (send-html-handler request response (slurp "./views/submit.html"))
-
+		  (send-html-handler request response (format (slurp "./views/submit.html") first-name last-name))
 		  ))
 
 
@@ -125,13 +123,13 @@
 		  			   new-data (assoc data "body" form-body)]
 		  			 (recur (rest c-l) (assoc form (data "name") new-data)))))))
 
-;(swap! atom #(assoc % k v))
+
 (defn parse-fields [body]
 	(let [body-list (split body #"&")]
 		(loop [body-dic {} bl body-list]
 			(if (empty? bl)
 				body-dic
-				(let [[k v] (split (first bl) #"=" 1)](recur (assoc body-dic k v) (rest bl)))))))
+				(let [[k v] (split (first bl) #"=" 2)](recur (assoc body-dic k v) (rest bl)))))))
 
 
 (def ROUTES {"get" {"/" home} "post" {"/submit" submit} "put" {} "delete" {}})
