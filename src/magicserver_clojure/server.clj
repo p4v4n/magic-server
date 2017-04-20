@@ -16,10 +16,6 @@
 (def SESSIONS {})
 
 
-(defn add-route [method path func]
-	(println "a"))
-
-
 (def test-get-str "GET / HTTP/1.1\r\nHost: localhost:8888\r\nConnection: keep-alive\r\nCache-Control: max-age=0\r\nUpgrade-Insecure-Requests: 1\r\nUser-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/56.0.2924.76 Chrome/56.0.2924.76 Safari/537.36\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\r\nDNT: 1\r\nAccept-Encoding: gzip, deflate, sdch, br\r\nAccept-Language: en-GB,en-US;q=0.8,en;q=0.6\r\n\r\n")
 (def test-post-str "POST /submit HTTP/1.1\r\nHost: localhost:8888\r\nConnection: keep-alive\r\nContent-Length: 31\r\nCache-Control: max-age=0\r\nOrigin: http://localhost:8888\r\nUpgrade-Insecure-Requests: 1\r\nUser-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/56.0.2924.76 Chrome/56.0.2924.76 Safari/537.36\r\nContent-Type: application/x-www-form-urlencoded\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\r\nDNT: 1\r\nReferer: http://localhost:8888/\r\nAccept-Encoding: gzip, deflate, br\r\nAccept-Language: en-GB,en-US;q=0.8,en;q=0.6\r\n\r\n")
 (def test-post-str2 "POST /submit HTTP/1.1\r\nHost: localhost:8888\r\nConnection: keep-alive\r\nContent-Length: 31\r\nCache-Control: max-age=0\r\nOrigin: http://localhost:8888\r\nUpgrade-Insecure-Requests: 1\r\nUser-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/57.0.2987.98 Chrome/57.0.2987.98 Safari/537.36\r\nContent-Type: application/x-www-form-urlencoded\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\r\nDNT: 1\r\nReferer: http://localhost:8888/\r\nAccept-Encoding: gzip, deflate, br\r\nAccept-Language: en-GB,en-US;q=0.8,en;q=0.6\r\n\r\nfirstname=Pavan&lastname=Mantha\r\n\r\n")
@@ -128,26 +124,28 @@
 				(let [[k v] (split (first b-list) #"=" 2)](recur (assoc body-dic k v) (rest b-list)))))))
 
 
-(def ROUTES {"get" {"/" home} "post" {"/submit" submit} "put" {} "delete" {}})
+(def ROUTES (atom {"get" {} "post" {} "put" {} "delete" {}}))
+
+
+(defn add-route [method path func]
+	(swap! ROUTES assoc method (assoc (@ROUTES method) path func)))
+
+
+(add-route "get" "/" home)
+(add-route "post" "/submit" submit)
 
 
 (defn get-handler [request response]
 	(try
-	    (((ROUTES "get") (request "path")) request response)
+	    (((@ROUTES "get") (request "path")) request response)
 	    (catch Exception e (err-404-handler request response))))
 
 
 (defn post-handler [request response]
 	(try
 		(if (re-find #"multipart" (request "Content-Type"))
-			(((ROUTES "post") (request "path")) (assoc (form-parser request) "content" ((form-parser request) "form")) response)
-			(((ROUTES "post") (request "path")) (assoc request "content" (parse-fields (request "body"))) response))
-		(catch Exception e (err-404-handler request response))))
-
-
-(defn delete-handler [request response]
-	(try
-		(((ROUTES "delete") (request "path")) request response)
+			(((@ROUTES "post") (request "path")) (assoc (form-parser request) "content" ((form-parser request) "form")) response)
+			(((@ROUTES "post") (request "path")) (assoc request "content" (parse-fields (request "body"))) response))
 		(catch Exception e (err-404-handler request response))))
 
 
