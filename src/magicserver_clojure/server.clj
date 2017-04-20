@@ -88,16 +88,6 @@
         (err-404-handler request response)))
 
 
-(defn home [request response]
-    (send-html-handler request response (slurp "./views/index.html")))
-
-
-(defn submit [request response]
-    (let [first-name ((request "content") "firstname")
-          last-name ((request "content") "lastname")]
-        (send-html-handler request response (format (slurp "./views/submit.html") first-name last-name))))
-
-
 (defn form-parser [request]
     (let [content-type (request "Content-Type")
           boundary (last (split content-type #"; "))
@@ -125,14 +115,6 @@
 
 
 (def ROUTES (atom {"get" {} "post" {} "put" {} "delete" {}}))
-
-
-(defn add-route [method path func]
-    (swap! ROUTES assoc method (assoc (@ROUTES method) path func)))
-
-
-(add-route "get" "/" home)
-(add-route "post" "/submit" submit)
 
 
 (defn get-handler [request response]

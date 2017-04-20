@@ -4,6 +4,7 @@
 ;;(require '[clojure.tools.cli :refer [cli]])
 
 (use 'magicserver-clojure.server)
+(use 'magicserver-clojure.main)
 
 
 (defn -main 
