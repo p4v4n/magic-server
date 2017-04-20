@@ -184,7 +184,6 @@
                                     (str f-s "\r\n")
                                     (recur (.readLine x) (str f-s s "\r\n"))))
           content-length (check-for-content-length request-header)
-          k (prn "The length of the content is " content-length)
           complete-request (if content-length 
                                (let [body (char-array content-length)]
                                    (.read x body 0 content-length)
