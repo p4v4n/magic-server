@@ -6,21 +6,45 @@ Can handle GET and POST requests.
 
 ## Installation
 
-Download from http://example.com/FIXME.
+Download the project and place your main app file in /src/magicserver_clojure.
 
 ## Usage
 
 To start the server at port 8888
 
     $ lein run 8888
+## How to use:
 
-## Options
+Static files have to be enclosed in 'views' directory under root.
 
-FIXME: listing of options this app accepts.
+```
+/
+views/
+    js/
+    img/
+    css/
+```
 
-## Examples
+To map the dynamic pages, use the function `server.add-route()` which takes 3 parameters
 
-...
+1. HTTP Method.
+2. Requested path.
+3. Function that would return the dynamic content.
+
+Eg:
+
+```
+(defn home [request response]
+  (server.send-html-handler request response content))
+  
+(server.add-route 'get' '/' home)
+```
+
+To send html or json data response, use the following functions `server.send-html-handler`  and `server.send-json-handler` which take 3 arguments
+
+1. request
+2. response
+3. requested HTML/JSON content
 
 ### Bugs
 
