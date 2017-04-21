@@ -2,6 +2,7 @@
 
 
 (ns magicserver-clojure.server)
+(use 'magicserver-clojure.sessions)
 (use '[clojure.string])
 (use '[clojure.data.json :as json])
 (require '[clojure.java.io :as io])
@@ -12,8 +13,6 @@
                    "jpeg" "image/jpeg", "jpg" "image/jpg", "png" "image/png", "gif" "image/gif",
                    "ico" "image/x-icon", "text" "text/plain", "json" "application/json"})
 
-
-(def SESSIONS {})
 
 
 (def test-get-str "GET / HTTP/1.1\r\nHost: localhost:8888\r\nConnection: keep-alive\r\nCache-Control: max-age=0\r\nUpgrade-Insecure-Requests: 1\r\nUser-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/56.0.2924.76 Chrome/56.0.2924.76 Safari/537.36\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\r\nDNT: 1\r\nAccept-Encoding: gzip, deflate, sdch, br\r\nAccept-Language: en-GB,en-US;q=0.8,en;q=0.6\r\n\r\n")
@@ -39,7 +38,9 @@
             [header-map (process-request-first-line (first header-list))
             re (rest header-list)]
             (if (empty? re)
-                header-map
+                (if (header-map "Cookie") 
+                    (assoc header-map "Cookie" {"sid" (subs (header-map "Cookie") 4)}) 
+                    header-map)
                 (recur
                     (assoc 
                         header-map
@@ -143,7 +144,7 @@
 
 
 (defn request-handler [request]
-    (method-handler request {}))
+    (method-handler request (session-handler request {})))
 
 
 (defn worker [data]
