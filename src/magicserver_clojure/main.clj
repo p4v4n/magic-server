@@ -8,8 +8,8 @@
 
 
 (defn home [request response]
-    (let [k (get-session request)
-    	userid (if k (k "userid"))]
+    (let [session-cookie (get-session request)
+    	userid (if session-cookie (session-cookie "userid"))]
     (if userid
     	(send-html-handler request response (format (slurp "./views/dashboard.html") userid))
         (send-html-handler request response (slurp "./views/index.html")))))
