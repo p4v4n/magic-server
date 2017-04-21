@@ -3,6 +3,7 @@
 
 ;;(require '[clojure.tools.cli :refer [cli]])
 
+(use 'magicserver-clojure.sessions)
 (use 'magicserver-clojure.server)
 (use 'magicserver-clojure.main)
 
