@@ -8,12 +8,14 @@
 
 
 (defn session-handler [request response]
-    (let [browser-cookies (request "Cookie")]
-        (if (and browser-cookies (browser-cookies "sid") (SESSIONS (browser-cookies "sid")))
+    (let [browser-cookies (request "Cookie")
+          sid (if browser-cookies (browser-cookies "sid"))
+          session-check (if sid (@SESSIONS sid))]
+        (if (and browser-cookies sid session-check)
             response
             (let [cookie (uuid)]
-                (swap! SESSIONS assoc cookie {})
-                (assoc response "Set-Cookie" (str "sid=" cookie))))))
+                (do (swap! SESSIONS assoc cookie {})
+                (assoc response "Set-Cookie" (str "sid=" cookie)))))))
 
 
 (defn add-session [request content]
@@ -25,7 +27,7 @@
 (defn get-session [request]
     (let [browser-cookies (request "Cookie")]
         (if (and browser-cookies (browser-cookies "sid"))
-            (SESSIONS (browser-cookies "sid")))))
+            (@SESSIONS (browser-cookies "sid")))))
 
 
 (defn del-session [request]
