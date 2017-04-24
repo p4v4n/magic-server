@@ -88,6 +88,14 @@
         (err-404-handler request response)))
 
 
+(defn static-file-handler [request response]
+    (try
+        (let [file-data (slurp (str "/public" (request "path")))
+              content-type (last (split (request "path") #"."))]
+            (ok-200-handler request (assoc response "content" file-data "Content-type" (CONTENT-TYPE content-type))))
+        (catch Exception e (err-404-handler request response))))
+
+
 (defn form-parser [request]
     (let [content-type (request "Content-Type")
           boundary (last (split content-type #"; "))
@@ -120,7 +128,7 @@
 (defn get-handler [request response]
     (try
         (((@ROUTES "get") (request "path")) request response)
-        (catch Exception e (err-404-handler request response))))
+        (catch Exception e (static-file-handler request response))))
 
 
 (defn post-handler [request response]
