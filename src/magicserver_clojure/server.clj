@@ -116,10 +116,10 @@
 
 (defn parse-fields [body]
     (let [body-list (split body #"&")]
-        (loop [body-dic {} b-list body-list]
+        (loop [body-dict {} b-list body-list]
             (if (empty? b-list)
-                body-dic
-                (let [[k v] (split (first b-list) #"=" 2)](recur (assoc body-dic k v) (rest b-list)))))))
+                body-dict
+                (let [[k v] (split (first b-list) #"=" 2)](recur (assoc body-dict k v) (rest b-list)))))))
 
 
 (def ROUTES (atom {"get" {} "post" {} "put" {} "delete" {}}))
@@ -168,11 +168,11 @@
 
 (defn receive [socket]
     (let [x (io/reader socket)
-          request-header (loop [s (.readLine x) 
-                                f-s ""]
-                                (if (empty? s)
-                                    (str f-s "\r\n")
-                                    (recur (.readLine x) (str f-s s "\r\n"))))
+          request-header (loop [new-line (.readLine x) 
+                                final-string ""]
+                                (if (empty? new-line)
+                                    (str final-string "\r\n")
+                                    (recur (.readLine x) (str final-string new-line "\r\n"))))
           content-length (check-for-content-length request-header)
           complete-request (if content-length 
                                (let [body (char-array content-length)]
