@@ -5,7 +5,8 @@
 
 (use 'magicserver-clojure.sessions)
 (use 'magicserver-clojure.server)
-(use 'magicserver-clojure.main)
+(use 'main)
+
 
 
 (defn -main 

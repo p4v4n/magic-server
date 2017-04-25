@@ -1,4 +1,4 @@
-(ns magicserver-clojure.main)
+(ns main)
 (use 'magicserver-clojure.sessions)
 (use 'magicserver-clojure.server)
 
