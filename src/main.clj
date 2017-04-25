@@ -16,8 +16,8 @@
 
 
 (defn login [request response]
-    (let [username ((request "content") "username")
-          password ((request "content") "password")]
+    (let [username ((request "Content") "username")
+          password ((request "Content") "password")]
          (add-session request {"userid" username})
         (send-html-handler request response (format (slurp "./views/dashboard.html") username))))
 

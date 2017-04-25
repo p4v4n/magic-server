@@ -81,7 +81,7 @@
 
 
 (defn err-404-handler [request response]
-    (response-handler request (assoc response "status" "HTTP/1.1 404 Not Found" "content" "Content Not Found" "Content-type" "text/html")))
+    (response-handler request (assoc response "status" "HTTP/1.1 404 Not Found" "Content" "Content Not Found" "Content-type" "text/html")))
 
 
 (defn send-html-handler [request response content]
@@ -144,8 +144,8 @@
 (defn post-handler [request response]
     (try
         (if (re-find #"multipart" (request "Content-Type"))
-            (((@ROUTES "post") (request "path")) (assoc (form-parser request) "content" ((form-parser request) "form")) response)
-            (((@ROUTES "post") (request "path")) (assoc request "content" (parse-fields (request "body"))) response))
+            (((@ROUTES "post") (request "path")) (assoc (form-parser request) "Content" ((form-parser request) "form")) response)
+            (((@ROUTES "post") (request "path")) (assoc request "Content" (parse-fields (request "body"))) response))
         (catch Exception e (err-404-handler request response))))
 
 
@@ -157,7 +157,7 @@
 
 
 (defn head-handler [request response]
-    (response-handler request (assoc response "content" "")))
+    (response-handler request (assoc response "Content" "")))
 
 
 (defn request-handler [request]
