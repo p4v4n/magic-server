@@ -51,6 +51,14 @@
 (def date (.toString (java.util.Date.)))
 
 
+(defn read-binary-file [file-path]
+  (with-open [reader (io/input-stream file-path)]
+    (let [length (.length (io/file file-path))
+          buffer (byte-array length)]
+      (.read reader buffer 0 length)
+      (apply str (map #(char (bit-and % 255)) buffer)))))
+
+
 (defn response-stringify [response]
     (let [keys-needed (filter #(and (not= % "status") (not= % "Content")) (keys response))
           response-string (str (response "status") "\r\n")]
@@ -84,15 +92,17 @@
 
 (defn send-json-handler [request response content]
     (if (not (empty? content))
-        (ok-200-handler request (assoc response "content" (json/write-str content) "Content-type" "application/json"))
+        (ok-200-handler request (assoc response "Content" (json/write-str content) "Content-type" "application/json"))
         (err-404-handler request response)))
 
 
-(defn static-file-handler [request response]
+(defn static-file-handler [request response]	
     (try
-        (let [file-data (slurp (str "/public" (request "path")))
-              content-type (last (split (request "path") #"."))]
-            (ok-200-handler request (assoc response "content" file-data "Content-type" (CONTENT-TYPE content-type))))
+        (let [k (prn "hi")
+        	file-data (read-binary-file (str "public" (request "path")))
+              content-type (last (split (request "path") #"\."))
+              k (prn (CONTENT-TYPE content-type))]
+            (ok-200-handler request (assoc response "Content" file-data "Content-type" (CONTENT-TYPE content-type))))
         (catch Exception e (err-404-handler request response))))
 
 
@@ -197,6 +207,7 @@
              (let [msg-in (receive sock)
                   a (prn "Request: " msg-in)
                   msg-out (handler msg-in)
-                  b (prn "Response: " msg-out)]
+                  b (prn "Response: " msg-out)
+                  ]
              (send sock msg-out))))))
     running))
