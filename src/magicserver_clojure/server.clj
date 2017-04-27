@@ -56,7 +56,8 @@
     (let [length (.length (io/file file-path))
           buffer (byte-array length)]
       (.read reader buffer 0 length)
-      (apply str (map #(char (bit-and % 255)) buffer)))))
+      (String. buffer)
+       )))
 
 
 (defn response-stringify [response]
@@ -65,7 +66,9 @@
          (loop [re response-string
                 h-keys keys-needed]
                 (if (empty? h-keys)
-                    (str re "\r\n" (response "Content") "\r\n\r\n")
+                	(if (response "Content")
+                        (str re "\r\n" (response "Content") "\r\n\r\n")
+                        (str re "\r\n"))
                     (recur (str re (first h-keys) ": " (response (first h-keys)) "\r\n") (rest h-keys))))))
 
 ;;Handlers
@@ -73,6 +76,9 @@
 (defn response-handler [request response]
     (response-stringify (assoc response "Date" date "Connection" "close" "Server" "magic-server-clojure")))
 
+
+(defn redirect-303-handler [location]
+	(response-stringify (assoc {} "status"  "HTTP/1.1 303 See Other" "Location" location)))
 
 (defn ok-200-handler [request response]
     (if (and (response "Content") (response "Content-type"))
@@ -103,7 +109,7 @@
               content-type (last (split (request "path") #"\."))
               k (prn (CONTENT-TYPE content-type))]
             (ok-200-handler request (assoc response "Content" file-data "Content-type" (CONTENT-TYPE content-type))))
-        (catch Exception e (err-404-handler request response))))
+        (catch Exception e (do (prn e) (err-404-handler request response)))))
 
 
 (defn form-parser [request]
